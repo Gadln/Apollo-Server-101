@@ -18,11 +18,16 @@ const typeDefs = `#graphql
     author: String
   }
 
+  type Mutation {
+  addBook(title: String, author: String): Book
+}
+
   # The "Query" type is special: it lists all of the available queries that
   # clients can execute, along with the return type for each. In this
   # case, the "books" query returns an array of zero or more Books (defined above).
   type Query {
     books: [Book]
+    getBookById(bookId: ID): Book
   }
 `;
 
@@ -44,6 +49,20 @@ const books = [
 const resolvers = {
   Query: {
     books: () => books,
+    getBookById: (_: any, args: any) => books.find((book) => book.id == args.bookId)
+  },
+  Mutation: {
+    addBook: (_: any, args: any) => {
+      const lastBook = books.at(-1);
+      const lastId = lastBook ? parseInt(lastBook.id, 10) : 0;
+      const newId = (lastId + 1).toString();
+      books.push({
+        title: args.title,
+        author: args.author,
+        id: newId,
+      });
+      return books.at(-1);
+    },
   },
 };
 
